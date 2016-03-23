@@ -19,11 +19,11 @@ function Network.new(sizes)
     for u = 1, net.sizes[l] do
       -- biases and incoming weights, only from second layer onwards
       if l > 1 then
-        layer.biases[u] = math.random()
+        layer.biases[u] = gauss(0, 1)
         layer.weights[u] = {}
       
         for u_in = 1,net.sizes[l-1] do
-          layer.weights[u][u_in] = math.random()
+          layer.weights[u][u_in] = gauss(0, 1)
         end
       end
     end
@@ -86,6 +86,15 @@ function sum(v)
   return res
 end
 
+-- Normal distributed random from http://osa1.net/posts/2012-12-19-different-distributions-from-uniform.html
+function box_muller()
+  return math.sqrt(-2 * math.log(math.random())) * math.cos(2 * math.pi * math.random()) / 2
+end
+
+function gauss(mean, width)
+  return mean + box_muller() * width
+end
+  
 
 -- Print utility functions
 
