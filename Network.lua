@@ -37,9 +37,8 @@ function Network:compute(input)
   
   local a = {input}
   for l = 2,self.num_layers do
---    print ("Activation of layer " .. (l-1) .. ": " .. v_to_string(a[l-1]))
---    print ("Trying to compute activation for layer " .. l .. "...")
-    a[l] = mat_mult_mv(net.layers[l].weights, a[l-1])
+    local raw_a = mat_mult_mv(net.layers[l].weights, a[l-1])
+    a[l] = map(sigmoid, raw_a) -- TODO: customize activation funcs?
   end
   return a[self.num_layers]
 end
@@ -86,6 +85,14 @@ function sum(v)
   return res
 end
 
+function map(func, arr)
+  local res = {}
+  for i,v in pairs(arr) do
+    res[i] = func(v)
+  end
+  return res
+end
+
 -- Normal distributed random from http://osa1.net/posts/2012-12-19-different-distributions-from-uniform.html
 function box_muller()
   return math.sqrt(-2 * math.log(math.random())) * math.cos(2 * math.pi * math.random()) / 2
@@ -96,7 +103,7 @@ function gauss(mean, width)
 end
   
 
--- Print utility functions
+-- Utility functions
 
 function v_to_string(v,sep)
   sep = sep or ","
