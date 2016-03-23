@@ -1,6 +1,6 @@
 require "Network"
 
--- Test
+-- Tests
 
 function testNetworkSetup(net, sizes)
   print ("Network layers: " .. #net.sizes)
@@ -20,9 +20,10 @@ function testCompute(net, input)
   print ("")
 end
 
-net = Network.new{2,4,3}
+sizes = {2,4,3}
+net = Network.new(sizes)
 print "=== Starting Network tests ==="
-testNetworkSetup(net, {2,4,3})
+testNetworkSetup(net, sizes)
 testCompute(net, {1,1})
 testCompute(net, {2,2})
 testCompute(net, {0,0})
