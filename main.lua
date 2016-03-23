@@ -13,13 +13,15 @@ end
 
 function testCompute(net, input)
   local output = net:compute(input)
-  assert(#output == #net.sizes[net.num_layers])
+  assert(#output == net.sizes[net.num_layers])
 
   print ("Input: " .. v_to_string(input))
   print ("Output: " .. v_to_string(output))
+  print ("")
 end
 
 net = Network.new{2,4,3}
+print "=== Starting Network tests ==="
 testNetworkSetup(net, {2,4,3})
 testCompute(net, {1,1})
 testCompute(net, {2,2})

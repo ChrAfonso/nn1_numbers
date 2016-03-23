@@ -37,8 +37,8 @@ function Network:compute(input)
   
   local a = {input}
   for l = 2,self.num_layers do
-    print ("Activation of layer " .. (l-1) .. ": " .. v_to_string(a[l-1]))
-    print ("Trying to compute activation for layer " .. l .. "...")
+--    print ("Activation of layer " .. (l-1) .. ": " .. v_to_string(a[l-1]))
+--    print ("Trying to compute activation for layer " .. l .. "...")
     a[l] = mat_mult_mv(net.layers[l].weights, a[l-1])
   end
   return a[self.num_layers]
@@ -73,7 +73,7 @@ function mat_mult_mv(mat, v)
   assert(#mat > 0 and #mat[1] == #v)
   local res = {}
   for i = 1,#mat do
-    res[i] = mat_mult_vv(mat[i], v)
+    res[i] = sum(mat_mult_vv(mat[i], v))
   end
   return res
 end
