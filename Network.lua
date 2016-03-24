@@ -50,6 +50,10 @@ function sigmoid(x)
   return (1 / (1 + math.exp(-x)))
 end
 
+function sigmoid_prime(x)
+  return sigmoid(x) * (1 - sigmoid(x))
+end
+
 function dot(u,v)
   assert(#u == #v)
   return sum(mat_mult_vv(u,v))
@@ -93,6 +97,17 @@ function map(func, arr)
   return res
 end
 
+function zero_mat(dims)
+  local mat = {}
+  for i,v in ipairs(dims) do
+    mat[i] = {}
+    for z = 1,v do
+      mat[i][z] = 0
+    end
+  end
+  return mat
+end
+
 -- Normal distributed random from http://osa1.net/posts/2012-12-19-different-distributions-from-uniform.html
 function box_muller()
   return math.sqrt(-2 * math.log(math.random())) * math.cos(2 * math.pi * math.random()) / 2
@@ -104,6 +119,15 @@ end
   
 
 -- Utility functions
+
+function shuffle(t)
+  local it = #t
+  local j
+  for i = it, 2, -1 do
+    j = math.random(i)
+    t[i],t[j] = t[j],t[i]
+  end
+end
 
 function v_to_string(v,sep)
   sep = sep or ","
