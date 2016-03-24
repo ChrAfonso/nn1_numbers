@@ -36,11 +36,24 @@ function Network:compute(input)
   assert(#input == self.sizes[1])
   
   local a = {input}
+  local z = {{}}
   for l = 2,self.num_layers do
-    local raw_a = mat_mult_mv(net.layers[l].weights, a[l-1])
-    a[l] = map(sigmoid, raw_a) -- TODO: customize activation funcs?
+    z[l] = mat_mult_mv(net.layers[l].weights, a[l-1])
+    a[l] = map(sigmoid, z[l]) -- TODO: customize activation funcs?
   end
-  return a[self.num_layers]
+  return a[self.num_layers], a, z
+end
+
+function Network:backprop(input, y)
+  local _, a, z = self:compute(input)
+  local nabla_b, nabla_w = {}, {}
+  for l = 1,self.num_layers do
+    nabla_b[l] = zero_mat(#self.layers[l].biases)
+    nabla_w[l] = zero_mat(#self.layers[l].weights, #self.layers[l].weights[1])
+  end
+  print("nabla_b: " .. v_to_string(nabla_b))
+  print("nabla_w: " .. v_to_string(nabla_w))
+  -- TODO
 end
 
 function Network:SGD(training_data, epochs, mini_batch_size, eta, test_data)
@@ -67,6 +80,18 @@ end
 
 function Network:update_mini_batch(mini_batch, eta)
   -- TODO
+end
+
+function Network:error_l(l, error_next, z_l)
+  return mat_mult_vv(mat_mult_mv(self.layers[l].weights_t, error_next), map(sigmoid_prime, z_l))
+end
+
+function error_L(z, y)
+  return map(error, z, y)
+end
+
+function error(zj, yj)
+  return (sigmoid(zj) - yj) * sigmoid_prime(zj)
 end
 
 -- Math utility functions
@@ -106,14 +131,30 @@ function mat_mult_mv(mat, v)
   return res
 end
 
+function transpose(mat)
+  local dimj = #mat
+  local dimi = #math[1]
+  local res = {}
+    for i = 1,dimi do
+      res[i] = {}
+      for j = 1,dimj do
+        res[i][j] = mat[j][i]
+      end
+    end
+  return res
+end
+
 function sum(v)
   return reduce((function(a,b) return a+b end), v)
 end
 
-function map(func, arr)
+function map(func, arr, arr2)
+  if arr2 then assert(#arr == #arr2) end
   local res = {}
+  local v2
   for i,v in pairs(arr) do
-    res[i] = func(v)
+    if arr2 then v2 = arr2[i] end
+    res[i] = func(v, v2)
   end
   return res
 end

@@ -31,6 +31,8 @@ function testCompute(net, input)
   print ("Input: " .. v_to_string(input))
   print ("Output: " .. v_to_string(output))
   print ("")
+
+  net:backprop(input, {1,1,1})
 end
 
 sizes = {2,4,3}
