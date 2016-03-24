@@ -43,6 +43,31 @@ function Network:compute(input)
   return a[self.num_layers]
 end
 
+function Network:SGD(training_data, epochs, mini_batch_size, eta, test_data)
+  local n = #training_data
+  math.randomseed(os.time())
+  local mini_batch
+  for i = 1,epochs do
+    print ("Training epoch " .. i)
+    shuffle(training_data)
+    for m = 1,n,mini_batch_size do
+      mini_batch = {}
+      for b = 0,mini_batch_size do
+        if (m+b > n) then break end
+        mini_batch[b+1] = training_data[m+b]
+      end
+      self:update_mini_batch(mini_batch, eta)
+    end
+    
+    if test_data then
+      -- TODO test
+    end
+  end
+end
+
+function Network:update_mini_batch(mini_batch, eta)
+  -- TODO
+end
 
 -- Math utility functions
 
