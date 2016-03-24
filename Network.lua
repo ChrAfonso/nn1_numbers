@@ -107,17 +107,21 @@ function mat_mult_mv(mat, v)
 end
 
 function sum(v)
-  local res = 0
-  for _,i in ipairs(v) do
-    res = res + i
-  end
-  return res
+  return reduce((function(a,b) return a+b end), v)
 end
 
 function map(func, arr)
   local res = {}
   for i,v in pairs(arr) do
     res[i] = func(v)
+  end
+  return res
+end
+
+function reduce(func, arr)
+  local res = arr[1] or 0
+  for i = 2,#arr do
+    res = func(res, arr[i])
   end
   return res
 end
