@@ -32,6 +32,17 @@ function Network.new(sizes)
   return net
 end
 
+function Network:classify(input)
+  local output = self:compute(input)
+  local maxindex = 1
+  for i = 1,#output do
+    if output[i] > output[maxindex] then
+      maxindex = i
+    end
+  end
+  return maxindex
+end
+
 function Network:compute(input)
   assert(#input == self.sizes[1])
   
