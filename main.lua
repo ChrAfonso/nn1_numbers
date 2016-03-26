@@ -6,9 +6,9 @@ function testMath()
   local arr1 = {1,2,3}
   local arr2 = {4,5,6}
   local arr3 = map(function(a) return a*a end, arr1)
-  assert(v_to_string(arr3) == "(1,4,9)")
-  local arr4 = mat_mult_vv(arr2, arr3)
-  assert(v_to_string(arr4) == "(4,20,54)")
+  assert(v_to_string(arr3) == "(1,4,9,)")
+  local arr4 = hadamard(arr2, arr3)
+  assert(v_to_string(arr4) == "(4,20,54,)")
   local sum4 = sum(arr4)
   assert(sum4 == 78)
   local tostring = reduce(function(a,b) return a .. " " .. b end, arr4)
