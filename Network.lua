@@ -179,7 +179,36 @@ function mat_add(m, n)
   return res
 end
 
+-- TODO: this must be made reecursive for higher-dim matrices
+function desparse(mat)
+  local maxdim = 0
+  
+  -- find max dim
+  for i = 1,#mat do
+    if type(mat[i]) == "table" then
+      maxdim = math.max(maxdim,#mat[i]) 
+    end
+  end
+  
+  if maxdim > 0 then
+    -- propagate max dim
+    for i = 1,#mat do
+      if type(mat[i]) ~= "table" then
+        mat[i] = {mat[i]}
+      end
+      while #mat[i] < maxdim do
+        table.insert(mat[i], 0)
+      end
+    end
+  end
+
+  return mat
+end
+
 function transpose(mat)
+  if type(mat) ~= "table" then return mat end
+  if type(mat[1]) ~= "table" then return mat end
+  
   local dimj = #mat
   local dimi = #mat[1]
   local res = {}
