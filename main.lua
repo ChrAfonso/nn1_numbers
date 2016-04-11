@@ -1,4 +1,5 @@
 require "Network"
+require "MNIST"
 
 -- Tests
 
@@ -70,7 +71,11 @@ function simpleTestSGD()
 
   net = Network.new({1,1})
   print("=== Testing simple SGD ===")
-  net:SGD(training, 1000, 1, 0.03, training)
+  net:SGD(training, 1000, 1, 3, training)
+end
+
+function testMNIST()
+  MNIST.load("train-labels.idx1-ubyte")
 end
 
 function testSGD()
@@ -129,5 +134,7 @@ testCompute(net, {1,1})
 testCompute(net, {2,2})
 testCompute(net, {0,0})
 
-simpleTestSGD()
+testMNIST()
+
+--simpleTestSGD()
 --testSGD()
