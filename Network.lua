@@ -155,8 +155,8 @@ function Network:update_mini_batch(mini_batch, eta)
   -- update weights and biases
   for l = 2, self.num_layers do
     print("  Updating weights/biases for layer " .. l)
-    map(function(a, b) b = a*eta + b end, nabla_b_acc[l], self.layers[l].biases)
-    map(function(a, b) b = mat_add(v_mult_s(a, eta), b) end, nabla_w_acc[l], self.layers[l].weights)
+    map(function(a, b) b = b - a*eta/#mini_batch end, nabla_b_acc[l], self.layers[l].biases)
+    map(function(a, b) b = mat_add(v_mult_s(a, -eta/#mini_batch), b) end, nabla_w_acc[l], self.layers[l].weights)
   end
 end
 
