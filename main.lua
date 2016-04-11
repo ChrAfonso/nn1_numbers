@@ -60,6 +60,19 @@ function testCompute(net, input)
   net:backprop(input, {1,1,1})
 end
 
+function simpleTestSGD()
+  training = {
+    {x={0}, y={0}},
+    {x={0}, y={0}},
+    {x={1}, y={1}},
+    {x={1}, y={1}}
+  }
+
+  net = Network.new({1,1})
+  print("=== Testing simple SGD ===")
+  net:SGD(training, 1000, 1, 0.03, training)
+end
+
 function testSGD()
   training = {
     {x={0, 0, 0, 0},y={1,0,0,0,0,0,0,0,0,0}},
@@ -115,4 +128,6 @@ testNetworkSetup(net, sizes)
 testCompute(net, {1,1})
 testCompute(net, {2,2})
 testCompute(net, {0,0})
-testSGD()
+
+simpleTestSGD()
+--testSGD()
