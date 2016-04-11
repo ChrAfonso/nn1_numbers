@@ -13,6 +13,31 @@ function testMath()
   assert(sum4 == 78)
   local tostring = reduce(function(a,b) return a .. " " .. b end, arr4)
   assert(tostring == "4 20 54")
+  
+  print ("Testing matrix operations...")
+  local mats = {}
+  mats[1] = {}
+  mats[2] = {0}
+  mats[3] = {0, 1, 2}
+  mats[4] = {0, {1, 2, 3}, {4, 5}}
+  mats[5] = {0, {1, 2, 3}, {{4, 5}, {6, 7}}}
+  
+  for i = 1, #mats do
+    print("Matrix " .. i .. ": ")
+    print(v_to_string(mats[i]))
+    
+    print("Matrix " .. i .. " desparsed: ")
+    print(v_to_string(desparse(mats[i])))
+
+    print("Matrix " .. i .. " transposed: ")
+    print(v_to_string(transpose(mats[i])))
+  end
+
+  print("Testing matrix zero-duplication...")
+  for i = 1, #mats do
+    print("Matrix " .. i .. ": ")
+    print(v_to_string(zero_mat_from_shape(mats[i])))
+  end
 end
 
 function testNetworkSetup(net, sizes)
@@ -35,6 +60,53 @@ function testCompute(net, input)
   net:backprop(input, {1,1,1})
 end
 
+function testSGD()
+  training = {
+    {x={0, 0, 0, 0},y={1,0,0,0,0,0,0,0,0,0}},
+    {x={0, 0, 0, 1},y={0,1,0,0,0,0,0,0,0,0}},
+    {x={0, 0, 1, 0},y={0,0,1,0,0,0,0,0,0,0}},
+    {x={0, 0, 1, 1},y={0,0,0,1,0,0,0,0,0,0}},
+    {x={0, 1, 0, 0},y={0,0,0,0,1,0,0,0,0,0}},
+    {x={0, 1, 0, 1},y={0,0,0,0,0,1,0,0,0,0}},
+    {x={0, 1, 1, 0},y={0,0,0,0,0,0,1,0,0,0}},
+    {x={0, 1, 1, 1},y={0,0,0,0,0,0,0,1,0,0}},
+    {x={1, 0, 0, 0},y={0,0,0,0,0,0,0,0,1,0}},
+    {x={1, 0, 0, 1},y={0,0,0,0,0,0,0,0,0,1}},
+
+    {x={1, 0, 1, 0},y={1,0,0,0,0,0,0,0,0,0}},
+    {x={1, 0, 1, 1},y={0,1,0,0,0,0,0,0,0,0}},
+    {x={1, 1, 0, 0},y={0,0,1,0,0,0,0,0,0,0}},
+    {x={1, 1, 0, 1},y={0,0,0,1,0,0,0,0,0,0}},
+    {x={1, 1, 1, 0},y={0,0,0,0,1,0,0,0,0,0}},
+    {x={1, 1, 1, 1},y={0,0,0,0,0,1,0,0,0,0}}
+  }
+
+  -- debug: overfitted
+  test = {
+    {x={0, 0, 0, 0},y={1,0,0,0,0,0,0,0,0,0}},
+    {x={0, 0, 0, 1},y={0,1,0,0,0,0,0,0,0,0}},
+    {x={0, 0, 1, 0},y={0,0,1,0,0,0,0,0,0,0}},
+    {x={0, 0, 1, 1},y={0,0,0,1,0,0,0,0,0,0}},
+    {x={0, 1, 0, 0},y={0,0,0,0,1,0,0,0,0,0}},
+    {x={0, 1, 0, 1},y={0,0,0,0,0,1,0,0,0,0}},
+    {x={0, 1, 1, 0},y={0,0,0,0,0,0,1,0,0,0}},
+    {x={0, 1, 1, 1},y={0,0,0,0,0,0,0,1,0,0}},
+    {x={1, 0, 0, 0},y={0,0,0,0,0,0,0,0,1,0}},
+    {x={1, 0, 0, 1},y={0,0,0,0,0,0,0,0,0,1}},
+    
+    {x={1, 0, 1, 0},y={1,0,0,0,0,0,0,0,0,0}},
+    {x={1, 0, 1, 1},y={0,1,0,0,0,0,0,0,0,0}},
+    {x={1, 1, 0, 0},y={0,0,1,0,0,0,0,0,0,0}},
+    {x={1, 1, 0, 1},y={0,0,0,1,0,0,0,0,0,0}},
+    {x={1, 1, 1, 0},y={0,0,0,0,1,0,0,0,0,0}},
+    {x={1, 1, 1, 1},y={0,0,0,0,0,1,0,0,0,0}}
+  }
+
+  net = Network.new({4, 30, 10})
+  print("=== Testing SGD ===")
+  net:SGD(training, 500, 5, 0.01, test)
+end
+
 sizes = {2,4,3}
 net = Network.new(sizes)
 print "=== Starting Network tests ==="
@@ -43,3 +115,4 @@ testNetworkSetup(net, sizes)
 testCompute(net, {1,1})
 testCompute(net, {2,2})
 testCompute(net, {0,0})
+testSGD()

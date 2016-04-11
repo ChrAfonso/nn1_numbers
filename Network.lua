@@ -44,7 +44,8 @@ function Network:classify(input)
 end
 
 function Network:compute(input)
-  assert(#input == self.sizes[1])
+  assert(type(input) == "table", "type(input) should be table, is: " .. type(input))
+  assert(#input == self.sizes[1], "#input: " .. (#input or "NIL") .. ", self.sizes[1]: " .. (self.sizes[1] or "NIL"))
   
   local a = {input}
   local z = {{}}
@@ -71,8 +72,8 @@ function Network:backprop(input, y)
     nabla_b[l] = err
     nabla_w[l] = map(function(e) return v_mult_s(a[l-1], e) end, err)
   end
-  print("nabla_b: " .. v_to_string(nabla_b))
-  print("nabla_w: " .. v_to_string(nabla_w))
+  --print("nabla_b: " .. v_to_string(nabla_b))
+  --print("nabla_w: " .. v_to_string(nabla_w))
   
   return nabla_b, nabla_w
 end
@@ -81,11 +82,13 @@ end
 function Network:SGD(training_data, epochs, mini_batch_size, eta, test_data)
   local n = #training_data
   math.randomseed(os.time())
+  errsums = {}
   local mini_batch
   for i = 1,epochs do
     print ("Training epoch " .. i)
     shuffle(training_data)
     for m = 1,n,mini_batch_size do
+      print (" Updating mini_batch " .. (math.floor(m / mini_batch_size) + 1))
       mini_batch = {}
       for b = 0,mini_batch_size do
         if (m+b > n) then break end
@@ -96,15 +99,64 @@ function Network:SGD(training_data, epochs, mini_batch_size, eta, test_data)
     
     if test_data then
       -- TODO test
+      local correct = 0
+      for t = 1,#test_data do
+        local td = test_data[t]
+        local c = self:compute(td.x)
+	print("Test sample " .. t .. ": " .. v_to_string(td.x) .. " -> " .. v_to_string(c) .. " (expected: " .. v_to_string(td.y) .. ")")
+	-- TODO compare
+      end
     end
   end
+
+  -- debug
+  -- print("Errsums: " .. v_to_string(errsums))
+  local efile = io.open("errsums.csv", "w")
+  io.output(efile)
+  for _,e in pairs(errsums) do
+    io.write(e .. "\n")
+  end
+  io.close(efile)
 end
 
 function Network:update_mini_batch(mini_batch, eta)
-  -- TODO
   -- for input in mini_batch: backprop and get nabla_w/b. Accumulate them. Update weights
-  for _,input in mini_batch do
-    self:backprop(input.x, input.y)
+  local nabla_b_acc, nabla_w_acc = nil
+
+  for _,input in pairs(mini_batch) do
+    local nabla_b, nabla_w = self:backprop(input.x, input.y)
+
+    for l = 1,#nabla_b do
+      desparse(nabla_b[l])
+      desparse(nabla_w[l])
+    end
+
+    if nabla_b_acc == nil then
+      nabla_b_acc = zero_mat_from_shape(nabla_b)
+      nabla_w_acc = zero_mat_from_shape(nabla_w)
+    end
+    
+    for l = 2, self.num_layers do
+      nabla_b_acc[l] = mat_add(nabla_b_acc[l], nabla_b[l])
+      nabla_w_acc[l] = mat_add(nabla_w_acc[l], nabla_w[l])
+    end
+  end
+  
+  -- debug: compute errsum = how much learning update we're doing
+  if errsums and type(errsums) == "table" then
+    local e = 0
+    for l = 1,self.num_layers do
+      e = e + sum(nabla_b_acc[l])
+      e = e + sum(map(function(v) return sum(v) end, nabla_w_acc[l]))
+    end
+    table.insert(errsums, e)
+  end
+
+  -- update weights and biases
+  for l = 2, self.num_layers do
+    print("  Updating weights/biases for layer " .. l)
+    map(function(a, b) b = a*eta + b end, nabla_b_acc[l], self.layers[l].biases)
+    map(function(a, b) b = mat_add(v_mult_s(a, eta), b) end, nabla_w_acc[l], self.layers[l].weights)
   end
 end
 
@@ -168,13 +220,12 @@ function mat_mult_mv(mat, v)
 end
 
 function mat_add(m, n)
-  assert(#m > 0 and #m == #n and #m[1] == #n[1])
+  if type(m) == "number" then return m + n end
+  
+  assert(#m > 0 and #m == #n)
   local res = {}
   for i = 1, #m do
-    res[i] = {}
-    for j = 1,#n do
-      res[i][j] = m[i][j] + n[i][j]
-    end
+    res[i] = mat_add(m[i], n[i])
   end
   return res
 end
@@ -226,7 +277,7 @@ function sum(v)
 end
 
 function map(func, arr, arr2)
-  if arr2 then assert(#arr == #arr2) end
+  if arr2 then assert(#arr == #arr2, "Arrays don't have the same length! arr: " .. #arr .. ", arr2: " .. #arr2) end
   local res = {}
   local v2
   for i,v in pairs(arr) do
