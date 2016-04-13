@@ -75,7 +75,12 @@ function simpleTestSGD()
 end
 
 function testMNIST()
-  MNIST.load("train-labels.idx1-ubyte")
+  training_labels,
+  validation_labels,
+  test_labels,
+  training_images,
+  validation_images,
+  test_images = MNIST.load("train-labels.idx1-ubyte","train-images.idx3-ubyte","t10k-labels.idx1-ubyte","t10k-labels.idx3-ubyte")
 end
 
 function testSGD()
