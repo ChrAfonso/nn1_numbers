@@ -47,7 +47,7 @@ function read_labels(file, offset, num, datatype)
   local labels = {}
   for i = 1,offset+num do
     if i >= offset then
-      labels[i-offset] = file:read(1)
+      labels[i-offset] = encode_label(file:read(1))
       --print("  label " .. i .. ": " .. bytes(labels[i]))
     end
   end
@@ -55,6 +55,13 @@ function read_labels(file, offset, num, datatype)
 
   file:close()
   return labels
+end
+
+function encode_label(s)
+  local label = s:byte(1)
+  local ret = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+  ret[label+1] = 1
+  return ret
 end
 
 function read_images(file, offset, num, datatype)
