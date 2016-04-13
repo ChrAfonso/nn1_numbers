@@ -93,18 +93,9 @@ end
 function zip(a, b)
   assert(type(a) == "table" and type(b) == "table" and #a == #b)
   
-  -- debug
-  print(type(a))
-  if(type(a) == "table") then
-    for i,v in pairs(a) do
-      print(i .. " -> " .. v_to_string(v))
-    end
-  end
-
   local pairs = {}
   for i = 1,#a do
     pairs[i] = { x = a[i], y = b[i] }
-    print("zip: Pairs[" .. i .. "] = { x = " .. v_to_string(a[i]) .. ", y = " .. v_to_string(b[i]).. "}")
   end
   return pairs
 end

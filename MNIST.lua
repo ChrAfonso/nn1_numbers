@@ -84,7 +84,7 @@ end
 function read_image(file, rows, cols)
   local image = { rows = rows, cols = cols }
   for i = 1,rows*cols do
-    image[i] = file:read(1)
+    image[i] = file:read(1):byte(1)
   end
   return image
 end
