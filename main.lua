@@ -80,7 +80,22 @@ function testMNIST()
   test_labels,
   training_images,
   validation_images,
-  test_images = MNIST.load("train-labels.idx1-ubyte","train-images.idx3-ubyte","t10k-labels.idx1-ubyte","t10k-labels.idx3-ubyte")
+  test_images = MNIST.load("train-labels.idx1-ubyte","train-images.idx3-ubyte","t10k-labels.idx1-ubyte","t10k-images.idx3-ubyte")
+
+  -- TODO train with this data
+  net = Network.new({784, 30, 10})
+  print("=== training with test images ===")
+  net:SGD(zip(training_images, training_labels), 100, 50, 3, zip(validation_images, validation_labels))
+end
+
+function zip(a, b)
+  assert(type(a) == "table" and type(b) == "table" and #a == #b)
+
+  local pairs = {}
+  for i = 1,#a do
+    pairs[i] = { x = a[i], y = b[i] }
+  end
+  return pairs
 end
 
 function testSGD()

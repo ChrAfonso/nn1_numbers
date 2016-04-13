@@ -7,9 +7,18 @@ function MNIST.load(training_label_file, training_image_file, test_label_file, t
   assert(#validation_labels == 10000)
   local test_labels = MNIST.load_file(test_label_file, "test", 10000)
   assert(#test_labels == 10000)
+  
+  local training_images = MNIST.load_file(training_image_file, "training", 10000) -- TEST, sonst 50000
+  assert(#training_images == 10000)
+  local validation_images = MNIST.load_file(training_image_file, "validation", 10000, 50000)
+  assert(#validation_images == 10000)
+  local test_images = MNIST.load_file(test_image_file, "test", 10000)
+  assert(#test_images == 10000)
+
+  return training_labels, validation_labels, test_labels, training_images, validation_images, test_images
 end
 
-function MNIST.load_file(filename, type, num, offset)
+function MNIST.load_file(filename, datatype, num, offset)
   offset = offset or 0
 
   print("MNIST file loading started...")
@@ -23,19 +32,61 @@ function MNIST.load_file(filename, type, num, offset)
   local num_items = tonumber(NUM_ITEMS, 16)
   print("Magic number: " .. MAGIC_NUMBER .. " (" .. (magic_number or "_") .. ")")
   print("Num of items: " .. NUM_ITEMS .. " (" .. (num_items or "_") .. ")")
+  
+  if magic_number == 2049 then
+    return read_labels(file, offset, num, datatype)
+  elseif magic_number == 2051 then
+    return read_images(file, offset, num, datatype)
+  else
+    print("Invalid magic number " .. magic_number);
+    return
+  end
+end
 
-  -- TODO generalize
+function read_labels(file, offset, num, datatype)
   local labels = {}
   for i = 1,offset+num do
     if i >= offset then
       labels[i-offset] = file:read(1)
-      --print("  label " .. i .. ": " .. bytes(training_labels[i]))
+      --print("  label " .. i .. ": " .. bytes(labels[i]))
     end
   end
-  print("Read in " .. num .. " " .. type .. " labels")
+  print("Read in " .. num .. " " .. datatype .. " labels")
 
   file:close()
   return labels
+end
+
+function read_images(file, offset, num, datatype)
+  local ROWS = bytes(file:read(4))
+  local rows = tonumber(ROWS, 16)
+  local COLS = bytes(file:read(4))
+  local cols = tonumber(COLS, 16)
+  print("  ROWS: " .. ROWS .. " (" .. (rows or "_") .. ")")
+  print("  COLS: " .. COLS .. " (" .. (cols or "_") .. ")")
+  if not rows or not cols then
+    print("Invalid dimensions.")
+    return nil
+  end
+
+  local images = {}
+  for i = 1,offset+num do
+    if i >= offset then
+      images[i-offset] = read_image(file, rows, cols)
+    end
+  end
+  print("Read in " .. num .. " " .. datatype .. " images")
+
+  file:close()
+  return images
+end
+
+function read_image(file, rows, cols)
+  local image = { rows = rows, cols = cols }
+  for i = 1,rows*cols do
+    image[i] = file:read(1)
+  end
+  return image
 end
 
 -- util
