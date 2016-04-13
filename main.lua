@@ -85,15 +85,26 @@ function testMNIST()
   -- TODO train with this data
   net = Network.new({784, 30, 10})
   print("=== training with test images ===")
-  net:SGD(zip(training_images, training_labels), 100, 50, 3, zip(validation_images, validation_labels))
+  local training_data = zip(training_images, training_labels)
+  local validation_data = zip(validation_images, validation_labels)
+  net:SGD(training_data, 100, 50, 3, validation_data)
 end
 
 function zip(a, b)
   assert(type(a) == "table" and type(b) == "table" and #a == #b)
+  
+  -- debug
+  print(type(a))
+  if(type(a) == "table") then
+    for i,v in pairs(a) do
+      print(i .. " -> " .. v_to_string(v))
+    end
+  end
 
   local pairs = {}
   for i = 1,#a do
     pairs[i] = { x = a[i], y = b[i] }
+    print("zip: Pairs[" .. i .. "] = { x = " .. v_to_string(a[i]) .. ", y = " .. v_to_string(b[i]).. "}")
   end
   return pairs
 end

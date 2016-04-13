@@ -47,6 +47,8 @@ function Network:compute(input)
   assert(type(input) == "table", "type(input) should be table, is: " .. type(input))
   assert(#input == self.sizes[1], "#input: " .. (#input or "NIL") .. ", self.sizes[1]: " .. (self.sizes[1] or "NIL"))
   
+  print("Input: " .. v_to_string(input))
+
   local a = {input}
   local z = {{}}
   for l = 2,self.num_layers do
@@ -329,6 +331,8 @@ function shuffle(t)
 end
 
 function v_to_string(v,sep)
+  if type(v) == "string" then return v end
+  
   local sep = sep or ","
   local s = "("
   local i,e

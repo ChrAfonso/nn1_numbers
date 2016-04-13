@@ -8,8 +8,8 @@ function MNIST.load(training_label_file, training_image_file, test_label_file, t
   local test_labels = MNIST.load_file(test_label_file, "test", 10000)
   assert(#test_labels == 10000)
   
-  local training_images = MNIST.load_file(training_image_file, "training", 10000) -- TEST, sonst 50000
-  assert(#training_images == 10000)
+  local training_images = MNIST.load_file(training_image_file, "training", 50000)
+  assert(#training_images == 50000)
   local validation_images = MNIST.load_file(training_image_file, "validation", 10000, 50000)
   assert(#validation_images == 10000)
   local test_images = MNIST.load_file(test_image_file, "test", 10000)
