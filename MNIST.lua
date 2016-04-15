@@ -47,8 +47,12 @@ function read_labels(file, offset, num, datatype)
   local labels = {}
   for i = 1,offset+num do
     if i >= offset then
-      labels[i-offset] = encode_label(file:read(1))
-      --print("  label " .. i .. ": " .. bytes(labels[i]))
+      if datatype == "training" then
+        labels[i-offset] = encode_label(file:read(1))
+      else
+        labels[i-offset] = file:read(1):byte(1) + 1
+        --print("  label " .. i .. ": " .. labels[i-offset])
+      end
     end
   end
   print("Read in " .. num .. " " .. datatype .. " labels")
@@ -76,13 +80,16 @@ function read_images(file, offset, num, datatype)
     return nil
   end
 
+  local start_time = os.clock()
   local images = {}
   for i = 1,offset+num do
     if i >= offset then
-      images[i-offset] = read_image(file, rows, cols)
+      images[i-offset] = read_image_fast(file, rows, cols)
     end
   end
-  print("Read in " .. num .. " " .. datatype .. " images")
+  local end_time = os.clock()
+  local time_diff = end_time - start_time
+  print("Read in " .. num .. " " .. datatype .. " images (Took " .. time_diff .. ")")
 
   file:close()
   return images
@@ -92,6 +99,15 @@ function read_image(file, rows, cols)
   local image = { rows = rows, cols = cols }
   for i = 1,rows*cols do
     image[i] = file:read(1):byte(1)
+  end
+  return image
+end
+
+function read_image_fast(file, rows, cols)
+  local image = { rows = rows, cols = cols }
+  local str = file:read(rows*cols)
+  for i = 1,rows*cols do
+    image[i] = str:byte(i)
   end
   return image
 end
