@@ -47,12 +47,10 @@ function Network:compute(input)
   assert(type(input) == "table", "type(input) should be table, is: " .. type(input))
   assert(#input == self.sizes[1], "#input: " .. (#input or "NIL") .. ", self.sizes[1]: " .. (self.sizes[1] or "NIL"))
   
-  print("Input: " .. v_to_string(input))
-
   local a = {input}
   local z = {{}}
   for l = 2,self.num_layers do
-    z[l] = mat_mult_mv(self.layers[l].weights, a[l-1])
+    z[l] = mat_add(mat_mult_mv(self.layers[l].weights, a[l-1]), self.layers[l].biases)
     a[l] = map(sigmoid, z[l]) -- TODO: customize activation funcs?
   end
   return a[self.num_layers], a, z
@@ -85,6 +83,13 @@ function Network:SGD(training_data, epochs, mini_batch_size, eta, test_data)
   local n = #training_data
   math.randomseed(os.time())
   errsums = {}
+  correct_rates = {}
+  
+  local tf = io.open("correct_rates.csv","w")
+  io.output(tf)
+  io.write("")
+  io.close(tf)
+
   local mini_batch
   for i = 1,epochs do
     print ("Training epoch " .. i)
@@ -104,10 +109,21 @@ function Network:SGD(training_data, epochs, mini_batch_size, eta, test_data)
       local correct = 0
       for t = 1,#test_data do
         local td = test_data[t]
-        local c = self:compute(td.x)
-	print("Test sample " .. t .. ": " .. v_to_string(td.x) .. " -> " .. v_to_string(c) .. " (expected: " .. v_to_string(td.y) .. ")")
-	-- TODO compare
+        --local c = self:compute(td.x)
+	--print("Test sample " .. t .. ": " .. v_to_string(td.x) .. " -> " .. v_to_string(c) .. " (expected: " .. v_to_string(td.y) .. ")")
+	-- compare
+        local c = self:classify(td.x)
+	if c == td.y then
+	  correct = correct + 1
+	end
       end
+      print("Test: Correctly classified " .. correct .. " of " .. #test_data)
+      table.insert(correct_rates, correct)
+      
+      local tf = io.open("correct_rates.csv", "a")
+      io.output(tf)
+      io.write(correct .. "\n")
+      io.close(tf)
     end
   end
 
@@ -119,6 +135,14 @@ function Network:SGD(training_data, epochs, mini_batch_size, eta, test_data)
     io.write(e .. "\n")
   end
   io.close(efile)
+  
+  -- print("Correct_rates: " .. v_to_string(correct_rates))
+  local cfile = io.open("correct_rates.csv", "w")
+  io.output(cfile)
+  for _,c in pairs(correct_rates) do
+    io.write(c .. "\n")
+  end
+  io.close(cfile)
 end
 
 function Network:update_mini_batch(mini_batch, eta)
@@ -157,8 +181,8 @@ function Network:update_mini_batch(mini_batch, eta)
   -- update weights and biases
   for l = 2, self.num_layers do
     print("  Updating weights/biases for layer " .. l)
-    map(function(a, b) b = b - a*eta/#mini_batch end, nabla_b_acc[l], self.layers[l].biases)
-    map(function(a, b) b = mat_add(v_mult_s(a, -eta/#mini_batch), b) end, nabla_w_acc[l], self.layers[l].weights)
+    self.layers[l].biases = map(function(a, b) return b - a*eta/#mini_batch end, nabla_b_acc[l], self.layers[l].biases)
+    self.layers[l].weights = map(function(a, b) return mat_add(v_mult_s(a, -eta/#mini_batch), b) end, nabla_w_acc[l], self.layers[l].weights)
   end
 end
 
