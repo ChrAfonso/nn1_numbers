@@ -87,7 +87,7 @@ function testMNIST()
   print("=== training with test images ===")
   local training_data = zip(training_images, training_labels)
   local validation_data = zip(validation_images, validation_labels)
-  net:SGD(training_data, 100, 50, 3, validation_data)
+  net:SGD(training_data, 100, 10, 3, validation_data)
 end
 
 function zip(a, b)
