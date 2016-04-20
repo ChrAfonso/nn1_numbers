@@ -32,6 +32,19 @@ function Network.new(sizes)
   return net
 end
 
+function Network:save(filename)
+  local file = io.open(filename, "w")
+  io.output(file)
+  io.write("network = " .. v_to_string(self, true))
+  io.close(file)
+end
+
+function Network.load(filename)
+  dofile(filename)
+  setmetatable(network, Network)
+  return network
+end
+
 function Network:classify(input)
   local output = self:compute(input)
   local maxindex = 1
