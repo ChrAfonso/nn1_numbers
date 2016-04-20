@@ -1,7 +1,7 @@
 function love.draw()
   love.graphics.clear()
 
-  local file = io.open("../errsums.csv", "r")
+  local file = io.open("../correct_rates.csv", "r")
   io.input(file)
   local x = 0
   local yoff = 200
