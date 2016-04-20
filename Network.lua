@@ -354,21 +354,28 @@ function shuffle(t)
   end
 end
 
-function v_to_string(v,sep)
+function v_to_string(v,use_names,sep,par)
   if type(v) == "string" then return v end
   
   local sep = sep or ","
-  local s = "("
+  local par = par or {'{','}'}
+  local s = par[1]
   local i,e
   for i,e in pairs(v) do
+    if #s > 1 then
+      -- not first element
+      s = s .. sep
+    end
     if type(e) == "table" then
-      s = s .. v_to_string(e)
+      if #s > 1 then s = s .. "\n" end
+      if use_names == true and type(i) ~= "number" then s = s .. i .. " = " end
+      s = s .. v_to_string(e,use_names,sep,par)
     else
+      if use_names == true and type(i) ~= "number" then s = s .. i .. " = " end
       s = s .. e
     end
-    s = s .. sep
   end
-  s = s .. ")"
+  s = s .. par[2]
   return s
 end
 
